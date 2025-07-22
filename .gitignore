@@ -1,0 +1,18 @@
+# Build
+bin/
+obj/
+
+# VS & Rider
+.vs/
+.idea/
+
+# User settings
+*.user
+*.suo
+
+# Secrets
+secrets.json
+
+# Env
+.env
+*.log
