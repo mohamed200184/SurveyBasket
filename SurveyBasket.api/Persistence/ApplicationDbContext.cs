@@ -2,10 +2,11 @@
 using Microsoft.EntityFrameworkCore;
 using SurveyBasket.api.Persistence.EntitiesConfigurations;
 using System.Reflection;
+using System.Security.Claims;
 
 namespace SurveyBasket.api.Persistence
 {
-    public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options):IdentityDbContext<ApplicationUser>(options)
+    public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options,IHttpContextAccessor httpContextAccessor):IdentityDbContext<ApplicationUser>(options)
     {
         public DbSet<Poll> polls { get; set; }
 
@@ -15,5 +16,27 @@ namespace SurveyBasket.api.Persistence
             base.OnModelCreating(modelBuilder);
           
         }
+
+        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            var entries = ChangeTracker.Entries<AutitableEntity>();
+            foreach (var entityEntry in entries)
+            {
+                var currendUserId = httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (entityEntry.State == EntityState.Added)
+                {
+                    entityEntry.Property(x=>x.CreatedById).CurrentValue = currendUserId;
+                }
+                else if (entityEntry.State == EntityState.Modified)
+                {
+                    entityEntry.Property(x => x.UpdatedById).CurrentValue = currendUserId;
+
+                    entityEntry.Property(x => x.UpdatedOn).CurrentValue = DateTime.UtcNow;
+                }
+            }
+
+            return base.SaveChangesAsync(cancellationToken);
+        }
+
     }
 }

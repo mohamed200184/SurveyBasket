@@ -2,7 +2,7 @@
 
 namespace SurveyBasket.api.Entities
 {
-    public sealed class Poll
+    public sealed class Poll :AutitableEntity
     {
 
        
@@ -19,6 +19,5 @@ namespace SurveyBasket.api.Entities
 
         public DateOnly EndAt { get; set; }
         
-
     }
 }

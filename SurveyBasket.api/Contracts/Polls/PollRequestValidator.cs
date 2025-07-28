@@ -1,8 +1,8 @@
 ﻿namespace SurveyBasket.api.Contracts.Polls
 {
-    public class LoginRequestValidator:AbstractValidator<PollRequest>
+    public class PollRequestValidator : AbstractValidator<PollRequest>
     {
-        public LoginRequestValidator()
+        public PollRequestValidator()
         {
             RuleFor(x => x.Title).NotEmpty()//.WithMessage("please add a {PropertyName} ")
                 .Length(3,100)
