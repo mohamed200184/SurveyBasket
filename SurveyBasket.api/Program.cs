@@ -23,7 +23,7 @@ namespace SurveyBasket.api
             }
 
             app.UseHttpsRedirection();
-
+            app.UseCors("AllowAll");
             app.UseAuthorization();
 
 
