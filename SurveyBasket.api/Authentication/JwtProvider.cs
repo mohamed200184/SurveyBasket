@@ -9,49 +9,51 @@ namespace SurveyBasket.api.Authentication
 {
     public class JwtProvider(IOptions<JwtOptions> options) : IJwtProvider
     {
-        private readonly IOptions<JwtOptions> _options = options;
+        private readonly JwtOptions _options = options.Value;
 
-        public (string token, int expiresIn) GenrateToken(ApplicationUser user)
+        public (string token, int expiresIn) GenerateToken(ApplicationUser user)
         {
             Claim[] claims = [
-                new(JwtRegisteredClaimNames.Sub,user.Id)
-                ,new(JwtRegisteredClaimNames.Email,user.Email!)
-                ,new(JwtRegisteredClaimNames.GivenName,user.FirstName)
-                ,new(JwtRegisteredClaimNames.FamilyName,user.LastName)
-                ,new(JwtRegisteredClaimNames.Jti,Guid.NewGuid().ToString())
-                ];
+                new(JwtRegisteredClaimNames.Sub, user.Id),
+            new(JwtRegisteredClaimNames.Email, user.Email!),
+            new(JwtRegisteredClaimNames.GivenName, user.FirstName),
+            new(JwtRegisteredClaimNames.FamilyName, user.LastName),
+            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            ];
 
+            var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.Key));
 
-            var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.Value.Key));
-            var signingCredentials = new SigningCredentials(symmetricSecurityKey, SecurityAlgorithms.HmacSha256);
-            var expiresIn = _options.Value.ExpirationInMinutes;
-            var expirationDate = DateTime.UtcNow.AddMinutes(expiresIn);
-            var token = new JwtSecurityToken(issuer: _options.Value.Issuer, audience: _options.Value.Audience,claims: claims, expires: DateTime.UtcNow.AddMinutes(expiresIn), signingCredentials: signingCredentials);
+            var singingCredentials = new SigningCredentials(symmetricSecurityKey, SecurityAlgorithms.HmacSha256);
 
-            return (token:new JwtSecurityTokenHandler().WriteToken(token), expiresIn *  60);
+            var token = new JwtSecurityToken(
+                issuer: _options.Issuer,
+                audience: _options.Audience,
+                claims: claims,
+                expires: DateTime.UtcNow.AddMinutes(_options.ExpiryMinutes),
+                signingCredentials: singingCredentials
+            );
+
+            return (token: new JwtSecurityTokenHandler().WriteToken(token), expiresIn: _options.ExpiryMinutes * 60);
         }
 
         public string? ValidateToken(string token)
         {
-           var tokenHandler = new JwtSecurityTokenHandler();
-           var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.Value.Key));
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.Key));
 
-             try
+            try
             {
                 tokenHandler.ValidateToken(token, new TokenValidationParameters
                 {
-                  
                     IssuerSigningKey = symmetricSecurityKey,
                     ValidateIssuerSigningKey = true,
                     ValidateIssuer = false,
                     ValidateAudience = false,
                     ClockSkew = TimeSpan.Zero
-                  
-                 
-                   
-                  
                 }, out SecurityToken validatedToken);
+
                 var jwtToken = (JwtSecurityToken)validatedToken;
+
                 return jwtToken.Claims.First(x => x.Type == JwtRegisteredClaimNames.Sub).Value;
             }
             catch

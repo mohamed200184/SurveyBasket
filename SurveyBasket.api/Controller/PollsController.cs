@@ -3,6 +3,7 @@
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using SurveyBasket.api.Abstractions;
 using SurveyBasket.api.Contracts.Polls;
 
 namespace SurveyBasket.api.Controller
@@ -29,64 +30,48 @@ namespace SurveyBasket.api.Controller
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> Get([FromRoute] int id)
+        public async Task<IActionResult> Get([FromRoute] int id,CancellationToken cancellationToken)
         {
-            var poll =await _pollService.GetAsync(id);
-            if (poll is null)
-            {
-                return NotFound();
-            }
-            var response = poll.Adapt<PollResponse>();
-            return Ok(response);
+            var result =await _pollService.GetAsync(id, cancellationToken);
+
+            return Ok(result.IsSuccess? Ok(result.Value) : NotFound(result.Error));
         }
 
         [HttpPost("")]
-        public async Task<IActionResult> Add([FromBody] PollRequest request,CancellationToken cancellationToken)
+        public async Task<IActionResult> Add([FromBody] PollRequest request,
+        CancellationToken cancellationToken)
         {
+            var result = await _pollService.AddAsync(request, cancellationToken);
 
-
-            var newpoll = await _pollService.AddAsync(request.Adapt<Poll>());
-
-            return CreatedAtAction(nameof(Get), new { id = newpoll.Id }, newpoll.Adapt<PollResponse>());
-
+            return result.IsSuccess ? CreatedAtAction(nameof(Get), new { id = result.Value.id }, result.Value) : result.ToProblem(StatusCodes.Status400BadRequest);
         }
 
 
         [HttpPut("({id})")]
         public async Task<IActionResult> Update([FromRoute] int id, [FromBody] PollRequest request, CancellationToken cancellationToken)
         {
-            var isUpdate = await _pollService.UpdateAsync(id, request.Adapt<Poll>(), cancellationToken);
+            var result = await _pollService.UpdateAsync(id, request, cancellationToken);
 
-            if (!isUpdate)
-            {
-                return NotFound();
-            }
-            return NoContent();
+            return result.IsSuccess ? NoContent() : result.ToProblem(StatusCodes.Status409Conflict);
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete([FromRoute] int id, CancellationToken cancellationToken)
         {
-            var isDelete =await _pollService.DeleteAsync(id, cancellationToken);
+            var result = await _pollService.DeleteAsync(id, cancellationToken);
 
-            if (!isDelete)
-            {
-                return NotFound();
-            }
-            return NoContent();
+        
+            return result.IsSuccess ? NoContent() : Problem(statusCode: StatusCodes.Status404NotFound, title: result.Error.code, detail: result.Error.Description);
         }
 
 
         [HttpPut("({id}/togglePublish)")]
         public async Task<IActionResult> TogglePublishStatus([FromRoute] int id, CancellationToken cancellationToken)
         {
-            var isUpdate = await _pollService.TogglePublishStatusAsync(id, cancellationToken);
+            var result = await _pollService.TogglePublishStatusAsync(id, cancellationToken);
 
-            if (!isUpdate)
-            {
-                return NotFound();
-            }
-            return NoContent();
+            return result.IsSuccess ? NoContent() : result.ToProblem(StatusCodes.Status400BadRequest);
+
         }
 
 

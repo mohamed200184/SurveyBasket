@@ -8,7 +8,7 @@ namespace SurveyBasket.api.Entities
        
         public int Id { get; set; }
 
-        
+         
         public string Title { get; set; } = string.Empty;
 
         public string Summary { get; set; } = string.Empty;
@@ -17,7 +17,10 @@ namespace SurveyBasket.api.Entities
 
         public DateOnly startsAt { get; set; }
 
-        public DateOnly EndAt { get; set; }
-        
+        public DateOnly EndsAt { get; set; }
+
+        public ICollection<Question> Questions { get; set; } = [];
+
+        public ICollection<Vote> Votes { get; set; } = [];
     }
 }

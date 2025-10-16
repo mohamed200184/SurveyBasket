@@ -10,7 +10,7 @@
         [Required]
         public string Audience { get; init; } = string.Empty;
         [Range(1, int.MaxValue)]
-        public int ExpirationInMinutes { get; init; }
+        public int ExpiryMinutes { get; init; }
 
 
 

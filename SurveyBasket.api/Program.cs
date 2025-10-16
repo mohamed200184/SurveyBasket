@@ -1,6 +1,7 @@
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using SurveyBasket.api.Middleware;
 using SurveyBasket.api.Persistence;
 
 namespace SurveyBasket.api
@@ -26,9 +27,10 @@ namespace SurveyBasket.api
             app.UseCors("AllowAll");
             app.UseAuthorization();
 
-
+          
             app.MapControllers();
 
+            app.UseExceptionHandler();
             app.Run();
         }
     }
