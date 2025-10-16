@@ -123,6 +123,35 @@ namespace SurveyBasket.api.Services
             return Result.Success();
         }
 
+        public async Task<Result<IEnumerable<QuestionResponse>>> GetAvillableAsync(int pollId, string userId, CancellationToken cancellationToken = default)
+        {
+            var hasVotes = await _context
+                .Votes
+                .AnyAsync
+                (x => x.PollId == pollId && x.UserId == userId, cancellationToken);
+        
 
+            if(hasVotes)
+                return Result.Failure<IEnumerable<QuestionResponse>>(VoteErrors.DublicatedVote);
+                
+            var pollIsExists = await _context.polls
+                .AnyAsync(x => x.Id == pollId && x.startsAt <= DateOnly.FromDateTime(DateTime.UtcNow) && x.EndsAt >= DateOnly.FromDateTime(DateTime.UtcNow), cancellationToken);
+
+            if (!pollIsExists)
+                return Result.Failure<IEnumerable<QuestionResponse>>(PollErrors.PollNotFound);
+              
+
+            var questions = await _context.Questions
+                .Where(x => x.PollId == pollId && x.IsActive)
+                .Include(x => x.Answers)
+                .Select(q => new QuestionResponse(
+                    q.Id,
+                    q.Content,
+                    q.Answers.Where(a => a.IsActive).Select(a => new AnswerResponse(a.Id, a.Content))
+                    ))
+                .AsNoTracking()
+                .ToListAsync(cancellationToken);
+            return Result.Success<IEnumerable<QuestionResponse>>(questions);
+        }
     }
 }
