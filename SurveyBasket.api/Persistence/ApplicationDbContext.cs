@@ -33,10 +33,10 @@ namespace SurveyBasket.api.Persistence
             var entries = ChangeTracker.Entries<AutitableEntity>();
             foreach (var entityEntry in entries)
             {
-                var currendUserId = httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var currendUserId = httpContextAccessor.HttpContext?.User.GetUserId();
                 if (entityEntry.State == EntityState.Added)
                 {
-                    entityEntry.Property(x=>x.CreatedById).CurrentValue = currendUserId;
+                    entityEntry.Property(x=>x.CreatedById).CurrentValue = currendUserId!;
                 }
                 else if (entityEntry.State == EntityState.Modified)
                 {

@@ -51,7 +51,7 @@ namespace SurveyBasket.api.Controller
         {
             var result = await _pollService.AddAsync(request, cancellationToken);
 
-            return result.IsSuccess ? CreatedAtAction(nameof(Get), new { id = result.Value.id }, result.Value) : result.ToProblem(StatusCodes.Status400BadRequest);
+            return result.IsSuccess ? CreatedAtAction(nameof(Get), new { id = result.Value.id }, result.Value) : result.ToProblem();
         }
 
 
@@ -60,7 +60,7 @@ namespace SurveyBasket.api.Controller
         {
             var result = await _pollService.UpdateAsync(id, request, cancellationToken);
 
-            return result.IsSuccess ? NoContent() : result.ToProblem(StatusCodes.Status409Conflict);
+            return result.IsSuccess ? NoContent() : result.ToProblem();
         }
 
         [HttpDelete("{id}")]
@@ -69,7 +69,7 @@ namespace SurveyBasket.api.Controller
             var result = await _pollService.DeleteAsync(id, cancellationToken);
 
         
-            return result.IsSuccess ? NoContent() : Problem(statusCode: StatusCodes.Status404NotFound, title: result.Error.code, detail: result.Error.Description);
+            return result.IsSuccess ? NoContent() :result.ToProblem();
         }
 
 
@@ -78,7 +78,7 @@ namespace SurveyBasket.api.Controller
         {
             var result = await _pollService.TogglePublishStatusAsync(id, cancellationToken);
 
-            return result.IsSuccess ? NoContent() : result.ToProblem(StatusCodes.Status400BadRequest);
+            return result.IsSuccess ? NoContent() : result.ToProblem();
 
         }
 
