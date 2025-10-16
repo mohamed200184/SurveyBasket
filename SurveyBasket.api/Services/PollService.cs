@@ -13,9 +13,12 @@ namespace SurveyBasket.api.Services
     public class PollService(ApplicationDbContext contexct) : IPollService
     {
         private readonly ApplicationDbContext _context= contexct;
-         public async Task<IEnumerable<Poll>> GetAllAsync(CancellationToken cancellationToken = default)
+         public async Task<IEnumerable<PollResponse>> GetAllAsync(CancellationToken cancellationToken = default)
         {
-            return await  _context.polls.AsNoTracking().ToListAsync(cancellationToken);
+            return await  _context.polls
+                .AsNoTracking()
+                .ProjectToType<PollResponse>()
+                .ToListAsync(cancellationToken);
         }
 
 
@@ -82,6 +85,13 @@ namespace SurveyBasket.api.Services
             return Result.Success();
         }
 
-
+        public async Task<IEnumerable<PollResponse>> GetCurrentAsync(CancellationToken cancellationToken = default)
+        {
+                return await _context.polls
+                .Where(x => x.IsPublished && x.startsAt <= DateOnly.FromDateTime(DateTime.UtcNow) && x.EndsAt >= DateOnly.FromDateTime(DateTime.UtcNow))
+                .AsNoTracking()
+                .ProjectToType<PollResponse>()
+                .ToListAsync(cancellationToken);
+        }
     }
 }
