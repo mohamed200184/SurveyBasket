@@ -16,5 +16,6 @@ global using SurveyBasket.api.Contracts.Polls;
 global using SurveyBasket.api.Contracts.Authentication;
 global using SurveyBasket.api.Abstractions;
 global using SurveyBasket.api.Errors;
+global using System.Security.Claims;
 
 global using SurveyBasket.api.Mapping;
