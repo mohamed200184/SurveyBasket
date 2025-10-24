@@ -4,10 +4,12 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using SurveyBasket.api.Authentication;
 using SurveyBasket.api.Persistence;
+using SurveyBasket.api.Services;
 using SurveyBasket.Services;
 using System.Reflection;
 using System.Text;
@@ -57,6 +59,7 @@ namespace SurveyBasket.api
             services.AddScoped<IPollService, PollService>();
             services.AddScoped<IQuestionService, QuestionService>();
             services.AddScoped<IVoteService, VoteService>();
+            services.AddScoped<IResultService, ResultService>();
             //validation using fluentvalidtion 
             services.AddFluentValidationConf();
             services.AddExceptionHandler<GlobalExceptionHandler>();
