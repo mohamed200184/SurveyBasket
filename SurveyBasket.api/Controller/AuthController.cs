@@ -9,14 +9,16 @@ namespace SurveyBasket.api.Controller
 {
     [Route("[controller]")]
     [ApiController]
-    public class AuthController(IAuthService authService,IOptions<JwtOptions> jwtoptions) : ControllerBase
+    public class AuthController(IAuthService authService,IOptions<JwtOptions> jwtoptions,ILogger<AuthController> logger) : ControllerBase
     {
         private readonly IAuthService _authService = authService;
+        private readonly ILogger<AuthController> _logger = logger;
         private readonly JwtOptions _jwtoptions = jwtoptions.Value;
 
         [HttpPost("")]
         public async Task<IActionResult> LoginAsync([FromBody] LoginRequest request, CancellationToken cancellationToken)
         {
+           // _logger.LogWarning("hello waringg");
             var authResult = await _authService.GetTokenAsync(request.Email, request.Password, cancellationToken);
             return authResult.IsSuccess ? Ok(authResult.Value) : authResult.ToProblem();
                 
