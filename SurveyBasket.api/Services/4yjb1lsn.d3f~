@@ -4,7 +4,7 @@ using SurveyBasket.api.Contracts.Questions;
 
 namespace SurveyBasket.api.Services
 {
-    public class QuestionService(ApplicationDbContext context,
+    public class QuestionService(ApplicationDbContext context
         HybridCache hybridCache,
         ILogger<QuestionService> logger
         ) : IQuestionService
@@ -83,8 +83,6 @@ namespace SurveyBasket.api.Services
             question.IsActive = !question.IsActive;
 
             await _context.SaveChangesAsync(cancellationToken);
-            await _hybridCache.RemoveAsync($"{_cachePrefix}-{pollId}", cancellationToken);
-
             return Result.Success();
         }
 
@@ -126,7 +124,6 @@ namespace SurveyBasket.api.Services
             });
 
             await _context.SaveChangesAsync(cancellationToken);
-            await _hybridCache.RemoveAsync($"{_cachePrefix}-{pollId}", cancellationToken);
 
             return Result.Success();
         }

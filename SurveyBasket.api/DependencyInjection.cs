@@ -64,6 +64,8 @@ namespace SurveyBasket.api
             services.AddFluentValidationConf();
             services.AddExceptionHandler<GlobalExceptionHandler>();
             services.AddProblemDetails();
+
+            services .AddHybridCache();
             return services;
         }
 
